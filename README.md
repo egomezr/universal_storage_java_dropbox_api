@@ -66,7 +66,7 @@ If you want to test the API, follow these steps:
    <version>1.0.0</version>
 </dependency>
 ```
-5. Create the tmp according to the entered path into the settings.json file.
+5. Create the tmp folder according to the entered path into the settings.json file.
 
 The root folder is the storage where the files will be stored.
 The tmp folder is where temporary files will be stored.
