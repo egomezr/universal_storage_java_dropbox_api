@@ -74,7 +74,7 @@ In order to use Dropbox as a storage, you need to create an App and generate an 
 
 1. [Create app](https://www.dropbox.com/developers/apps) on Dropbox site.
 2. After app creation, generate an access token.
-<img src="https://s3.amazonaws.com/shared-files-2017/generate_at_dropbox.png"/>
+<img src="https://s3.amazonaws.com/shared-files-2017/generate_at__dropbox.png"/>
 
 # How to use
 **Examples for Storing files:**
