@@ -13,7 +13,7 @@ Universal storage provides you an interface for storing files according to your 
 1. [Maven project](maven-project)
 2. [Test API](#test-api)
 3. [Settings](#settings)
-4. [Dropbox App](dropbox-app)
+4. [Dropbox App](#dropbox-app)
 5. [How to use](#how-to-use)
 
 # Maven project
