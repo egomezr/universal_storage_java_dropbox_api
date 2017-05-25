@@ -187,7 +187,7 @@ try {
 }
 ```
 
-**Clean tmp folder:**
+**Clean up tmp folder:**
 ```java
 try {
       UniversalStorage us = UniversalStorage.Impl.getInstance();
