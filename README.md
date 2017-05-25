@@ -68,7 +68,12 @@ If you want to test the API, follow these steps:
 
 The root folder is the storage where the files will be stored.
 The tmp folder is where temporary files will be stored.
-  
+
+## Dropbox App
+In order to use Dropbox as a storage, you need to create an App and generate an access token.
+
+1. Create an app on [Create app](https://www.dropbox.com/developers/apps)
+
 # How to use
 **Examples for Storing files:**
 
