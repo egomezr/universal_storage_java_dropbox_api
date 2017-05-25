@@ -72,7 +72,9 @@ The tmp folder is where temporary files will be stored.
 ## Dropbox App
 In order to use Dropbox as a storage, you need to create an App and generate an access token.
 
-1. Create an app on [Create app](https://www.dropbox.com/developers/apps)
+1. [Create app](https://www.dropbox.com/developers/apps) on Dropbox site.
+2. After app creation, generate an access token.
+<img src="https://s3.amazonaws.com/shared-files-2017/generate_at_dropbox.png" alt=""/>
 
 # How to use
 **Examples for Storing files:**
