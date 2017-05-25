@@ -13,7 +13,8 @@ Universal storage provides you an interface for storing files according to your 
 1. [Maven project](maven-project)
 2. [Test API](#test-api)
 3. [Settings](#settings)
-4. [How to use](#how-to-use)
+4. [Dropbox App](dropbox-app)
+5. [How to use](#how-to-use)
 
 # Maven project
 This API follows the Maven structure to ease its installation within your project.
@@ -69,7 +70,7 @@ If you want to test the API, follow these steps:
 The root folder is the storage where the files will be stored.
 The tmp folder is where temporary files will be stored.
 
-## Dropbox App
+# Dropbox App
 In order to use Dropbox as a storage, you need to create an App and generate an access token.
 
 1. [Create app](https://www.dropbox.com/developers/apps) on Dropbox site.
@@ -88,7 +89,7 @@ In order to use Dropbox as a storage, you need to create an App and generate an 
 }
 ```
 
-This api will get the access token through either this file or using the environment variable `access_token`.
+### This api will get the access token through either this file or using the environment variable `access_token`.
 
 # How to use
 **Examples for Storing files:**
