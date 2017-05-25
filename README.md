@@ -102,3 +102,46 @@ try {
     fail(e.getMessage());
 }
 ```
+
+**Remove file:**
+```java
+try {
+      UniversalStorage us = UniversalStorage.Impl.getInstance();
+      us.removeFile("/home/test/resources/settings.json");
+} catch (UniversalStorageException e) {
+    e.printStackTrace();
+}
+
+```
+
+**Create folder:**
+
+```java
+try {
+      UniversalStorage us = UniversalStorage.Impl.getInstance();
+      us.createFolder("/myNewFolder");
+} catch (UniversalStorageException e) {
+    e.printStackTrace();
+}
+
+```
+
+**Remove folder:**
+```java
+try {
+      UniversalStorage us = UniversalStorage.Impl.getInstance();
+      us.removeFolder("/myNewFolder");
+} catch (UniversalStorageException e) {
+    e.printStackTrace();
+}
+```
+
+**Retrieve file:**
+```java
+try {
+      UniversalStorage us = UniversalStorage.Impl.getInstance();
+      us.retrieveFile("myFolder/file.txt");
+} catch (UniversalStorageException e) {
+    e.printStackTrace();
+}
+```
