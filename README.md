@@ -75,7 +75,8 @@ In order to use Dropbox as a storage, you need to create an App and generate an 
 1. [Create app](https://www.dropbox.com/developers/apps) on Dropbox site.
 2. After app creation, generate an access token.
 <img src="https://s3.amazonaws.com/shared-files-2017/generate_at__dropbox.png"/>
-3. Copy the generated access token and paste it into the settings.json file.  This api will get the access token through either this file or using the environment variable `'access_token'`.
+3. Copy the generated access token and paste it into the settings.json file.
+
 ```json
 {
 	"provider": "dropbox",
@@ -86,6 +87,8 @@ In order to use Dropbox as a storage, you need to create an App and generate an 
 	}
 }
 ```
+
+This api will get the access token through either this file or using the environment variable `access_token`.
 
 # How to use
 **Examples for Storing files:**
