@@ -164,6 +164,7 @@ try {
 ```
 
 **Retrieve file:**
+
 This file will be stored into the tmp folder.
 ```java
 try {
@@ -175,6 +176,7 @@ try {
 ```
 
 **Retrieve file as InputStream:**
+
 This inputstream will use a file that was stored into the tmp folder.
 ```java
 try {
