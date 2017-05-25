@@ -164,10 +164,32 @@ try {
 ```
 
 **Retrieve file:**
+This file will be stored into the tmp folder.
 ```java
 try {
       UniversalStorage us = UniversalStorage.Impl.getInstance();
-      us.retrieveFile("myFolder/file.txt");
+      File file = us.retrieveFile("myFolder/file.txt");
+} catch (UniversalStorageException e) {
+    e.printStackTrace();
+}
+```
+
+**Retrieve file as InputStream:**
+This inputstream will use a file that was stored into the tmp folder.
+```java
+try {
+      UniversalStorage us = UniversalStorage.Impl.getInstance();
+      InputSstream stream = us.retrieveFileAsStream("myFolder/file.txt");
+} catch (UniversalStorageException e) {
+    e.printStackTrace();
+}
+```
+
+**Clean tmp folder:**
+```java
+try {
+      UniversalStorage us = UniversalStorage.Impl.getInstance();
+      us.clean();
 } catch (UniversalStorageException e) {
     e.printStackTrace();
 }
