@@ -91,6 +91,10 @@ In order to use Dropbox as a storage, you need to create an App and generate an 
 
 ### This api will get the access token through either this file or using the environment variable `access_token`
 
+4. Now you need to go to the application folder (The name of this folder is the app's name) and create your root folder inside of it, for example:
+
+<img src="https://s3.amazonaws.com/shared-files-2017/root_folder_at__dropbox.png"/>
+
 # How to use
 **Examples for Storing files:**
 
