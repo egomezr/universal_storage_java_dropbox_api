@@ -89,7 +89,7 @@ In order to use Dropbox as a storage, you need to create an App and generate an 
 }
 ```
 
-### This api will get the access token through either this file or using the environment variable `access_token`.
+### This api will get the access token through either this file or using the environment variable `access_token`
 
 # How to use
 **Examples for Storing files:**
