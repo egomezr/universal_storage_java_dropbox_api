@@ -5,20 +5,20 @@ import com.universal.error.UniversalIOException;
 import com.universal.storage.settings.UniversalSettings;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
-import java.security.GeneralSecurityException;
 
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
 import com.dropbox.core.DbxHost;
 import com.dropbox.core.DbxRequestConfig;
@@ -77,7 +77,9 @@ public class UniversalDropboxStorage extends UniversalStorage {
      */
     void storeFile(File file, String path) throws UniversalIOException {
         if (file.isDirectory()) {
-            throw new UniversalIOException(file.getName() + " is a folder.  You should call the createFolder method.");
+            UniversalIOException error = new UniversalIOException(file.getName() + " is a folder.  You should call the createFolder method.");
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
 
         if (path != null) {
@@ -124,6 +126,7 @@ public class UniversalDropboxStorage extends UniversalStorage {
             //
             // We track how many bytes we uploaded to determine which phase we should be in.
             String sessionId = null;
+            this.triggerOnStoreFileListeners();
             for (int i = 0; i < CHUNKED_UPLOAD_MAX_ATTEMPTS; ++i) {
                 try {
                     InputStream in = new FileInputStream(file);
@@ -159,7 +162,12 @@ public class UniversalDropboxStorage extends UniversalStorage {
                         .withClientModified(new Date(file.lastModified()))
                         .build();
 
-                    dbxClient.files().uploadSessionFinish(cursor, commitInfo).uploadAndFinish(in, remaining);
+                    FileMetadata result = dbxClient.files().uploadSessionFinish(cursor, commitInfo).uploadAndFinish(in, remaining);
+
+                    this.triggerOnFileStoredListeners(new UniversalStorageData(file.getName(), 
+                            "",
+                            result.getId(), 
+                            this.settings.getRoot() + ("".equals(path) ? "" : ("/" + path))));
                 } catch (RetryException ex) {
                     // RetryExceptions are never automatically retried by the client for uploads. Must
                     // catch this exception even if DbxRequestConfig.getMaxRetries() > 0.
@@ -174,7 +182,9 @@ public class UniversalDropboxStorage extends UniversalStorage {
                         
                         continue;
                     } else {
-                        throw new UniversalIOException(ex.getMessage());
+                        UniversalIOException error = new UniversalIOException(ex.getMessage());
+                        this.triggerOnErrorListeners(error);
+                        throw error;
                     }
                 } catch (UploadSessionFinishErrorException ex) {
                     if (ex.errorValue.isLookupFailed() && ex.errorValue.getLookupFailedValue().isIncorrectOffset()) {
@@ -182,16 +192,24 @@ public class UniversalDropboxStorage extends UniversalStorage {
 
                         continue;
                     } else {
-                        throw new UniversalIOException(ex.getMessage());
+                        UniversalIOException error = new UniversalIOException(ex.getMessage());
+                        this.triggerOnErrorListeners(error);
+                        throw error;
                     }
                 } catch (DbxException ex) {
-                    throw new UniversalIOException(ex.getMessage());
+                    UniversalIOException error = new UniversalIOException(ex.getMessage());
+                    this.triggerOnErrorListeners(error);
+                    throw error;
                 } catch (IOException ex) {
-                    throw new UniversalIOException(ex.getMessage());
+                    UniversalIOException error = new UniversalIOException(ex.getMessage());
+                    this.triggerOnErrorListeners(error);
+                    throw error;
                 }
             }
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
     }
 
@@ -209,12 +227,21 @@ public class UniversalDropboxStorage extends UniversalStorage {
      */
     private void uploadFile(File file, String path) throws UniversalIOException {
         try {
-            dbxClient.files().uploadBuilder(path + "/" + file.getName())
+            this.triggerOnStoreFileListeners();
+            
+            FileMetadata result = dbxClient.files().uploadBuilder(path + "/" + file.getName())
                 .withMode(WriteMode.OVERWRITE)
                 .withClientModified(new Date(file.lastModified()))
                 .uploadAndFinish(new FileInputStream(file));
+
+            this.triggerOnFileStoredListeners(new UniversalStorageData(file.getName(), 
+                    "",
+                    result.getId(), 
+                    this.settings.getRoot() + ("".equals(path) ? "" : ("/" + path))));
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
     }
 
@@ -287,9 +314,13 @@ public class UniversalDropboxStorage extends UniversalStorage {
         }
 
         try {
+            this.triggerOnRemoveFileListeners();
             this.dbxClient.files().delete(path);
+            this.triggerOnFileRemovedListeners();
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         }      
     }
 
@@ -315,7 +346,9 @@ public class UniversalDropboxStorage extends UniversalStorage {
         PathValidator.validatePath(path);
 
         if ("".equals(path.trim())) {
-            throw new UniversalIOException("Invalid path.  The path shouldn't be empty.");
+            UniversalIOException error = new UniversalIOException("Invalid path.  The path shouldn't be empty.");
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
 
         if (path != null && path.endsWith("/")) {
@@ -331,9 +364,18 @@ public class UniversalDropboxStorage extends UniversalStorage {
         }
 
         try {
-            this.dbxClient.files().createFolder(path);
+            this.triggerOnCreateFolderListeners();
+
+            FolderMetadata result = this.dbxClient.files().createFolder(path);
+            
+            this.triggerOnFolderCreatedListeners(new UniversalStorageData(path, 
+                    "",
+                    result.getId(), 
+                    this.settings.getRoot() + ("".equals(path) ? "" : ("/" + path))));
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         }   
     }
 
@@ -371,9 +413,13 @@ public class UniversalDropboxStorage extends UniversalStorage {
         }
 
         try {
+            this.triggerOnRemoveFolderListeners();
             this.dbxClient.files().delete(path);
+            this.triggerOnFolderRemovedListeners();
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
     }
 
@@ -393,7 +439,9 @@ public class UniversalDropboxStorage extends UniversalStorage {
         }
 
         if (path.trim().endsWith("/")) {
-            throw new UniversalIOException("Invalid path.  Looks like you're trying to retrieve a folder.");
+            UniversalIOException error = new UniversalIOException("Invalid path.  Looks like you're trying to retrieve a folder.");
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
 
         int index = path.lastIndexOf("/");
@@ -431,7 +479,9 @@ public class UniversalDropboxStorage extends UniversalStorage {
         path = path.trim().replace("\\", "/");
 
         if (path.trim().endsWith("/")) {
-            throw new UniversalIOException("Invalid path.  Looks like you're trying to retrieve a folder.");
+            UniversalIOException error = new UniversalIOException("Invalid path.  Looks like you're trying to retrieve a folder.");
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
 
         int index = path.lastIndexOf("/");
@@ -464,7 +514,9 @@ public class UniversalDropboxStorage extends UniversalStorage {
             
             return new FileInputStream(this.settings.getTmp() + fileName);
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         } finally {
             if (downloadFile != null) {
                 try {
@@ -482,7 +534,27 @@ public class UniversalDropboxStorage extends UniversalStorage {
         try {
             FileUtils.cleanDirectory(new File(this.settings.getTmp()));
         } catch (Exception e) {
-            throw new UniversalIOException(e.getMessage());
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
+        }
+    }
+
+    /**
+     * This method wipes the root folder of a storage, basically, will remove all files and folder in it.  
+     * Be careful with this method because in too many cases this action won't provide a rollback action.
+     */
+    public void wipe() throws UniversalIOException {
+        try {
+            ListFolderResult result = dbxClient.files().listFolder("/" + this.settings.getRoot());
+            List<Metadata> data = result.getEntries();
+            for (Metadata md : data) {
+                this.dbxClient.files().delete("/" + this.settings.getRoot() + "/" + md.getName());
+            }
+        } catch (Exception e) {
+            UniversalIOException error = new UniversalIOException(e.getMessage());
+            this.triggerOnErrorListeners(error);
+            throw error;
         }
     }
 }
